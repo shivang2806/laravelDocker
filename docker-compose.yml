@@ -1,0 +1,42 @@
+version: "3"
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: ./dockerfile
+    volumes:
+      - "./:/var/www/html"
+    ports:
+      - "81:80"
+    depends_on:
+      - mysql
+    
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "mysql"]
+      timeout: 20s
+      retries: 10
+    volumes:
+      - ./mysql:/var/lib/mysql
+    ports:
+      - '3308:3306'
+    
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    depends_on:
+      - mysql
+    ports:
+      - 2021:80
+
